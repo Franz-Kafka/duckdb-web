@@ -19,6 +19,7 @@ extension:
 repo:
   github: midwork-finds-jobs/duckdb_http_request
   ref: d4ad6fb9728b637996de4e23e0afcaf89b5140b4
+  ref_next: 1c0324d3749d7b2d82fbf35b289cd2ca4da62934
 
 docs:
   hello_world: |
@@ -68,8 +69,8 @@ docs:
 
 extension_star_count: 1
 extension_star_count_pretty: 1
-extension_download_count: 421
-extension_download_count_pretty: 421
+extension_download_count: 483
+extension_download_count_pretty: 483
 image: '/images/community_extensions/social_preview/preview_community_extension_http_request.png'
 layout: community_extension_doc
 ---
