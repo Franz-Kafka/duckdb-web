@@ -52,6 +52,9 @@ header .headerline {
 				> div {
 					position: relative;
 				}
+				> div.mobile-only {
+					display: none;
+				}
 				
 				a {
 					color: var(--menu-topmenu-text-color, #1A1A1A);

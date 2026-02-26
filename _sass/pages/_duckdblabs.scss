@@ -14,17 +14,23 @@ footer .sitefooter .footercontent > div a:hover {
 header .headerline .headercontent .header-actions {
 	display: flex;
 	align-items: center;
-	gap: 15px;
+	gap: 35px;
 	z-index: 25;
 	font-size: 15px;
+
+	a {
+		text-decoration: none;
+		color: var(--menu-topmenu-text-color, #F2F2F2);
+		transition: color .3s;
+		&:hover {
+			color: var(--orange-50);
+		}
+	}
 
 	a.duckdb-link {
 		display: flex;
 		align-items: center;
 		gap: 5px;
-		text-decoration: none;
-		color: var(--menu-topmenu-text-color, #F2F2F2);
-		transition: color .3s;
 		.icon {
 			width: 16px;
 			height: 16px;
@@ -32,7 +38,6 @@ header .headerline .headercontent .header-actions {
 			transition: color .3s;
 		}
 		&:hover {
-			color: var(--orange-50);
 			.icon {
 				color: var(--orange-50);
 			}
@@ -71,6 +76,8 @@ body.landing{
 			line-height: 0.8em;
 			margin-top: 0.2em;
 			margin-bottom: 0.12em;
+			border-image: linear-gradient(to right, var(--orange-50), var(--orange-transparent-20)) 1;
+
 			.typecursor{
 				font-weight: 450;
 				margin-left: 1px;
