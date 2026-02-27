@@ -25,7 +25,7 @@
     var state = {
       platform: null,
       environment: null,
-      version: 'stable'
+      version: 'current'
     };
 
     function detectPlatform() {
@@ -54,7 +54,7 @@
         state.platform = sanitizeParam(params.get('platform'));
         state.environment = sanitizeParam(params.get('environment'));
         var v = sanitizeParam(params.get('version'));
-        if (v === 'lts' || v === 'stable') state.version = v;
+        if (v === 'lts' || v === 'current') state.version = v;
       } catch (e) {}
     }
 
@@ -218,8 +218,8 @@
         $versionSwitch.attr('hidden', '');
         // Auto-select whichever version is available
         var envSel = '[data-environment="' + cssEscape(state.environment) + '"]';
-        var hasStable = $templates.find(envSel + '.stable').length > 0;
-        state.version = hasStable ? 'stable' : 'lts';
+        var hasStable = $templates.find(envSel + '.current').length > 0;
+        state.version = hasStable ? 'current' : 'lts';
       }
 
       $versionBtns.each(function () {
@@ -295,7 +295,7 @@
     function bestTemplate() {
       var p = state.platform;
       var e = state.environment;
-      var v = state.version || 'stable';
+      var v = state.version || 'current';
 
       if (!e) return $();
 
@@ -304,7 +304,7 @@
       if ($match.length) return $match;
 
       // Fallback: try the other version (for clients with only one version)
-      var altV = v === 'stable' ? 'lts' : 'stable';
+      var altV = v === 'current' ? 'lts' : 'current';
       return findTemplate(e, p, altV);
     }
 
@@ -318,7 +318,7 @@
 
     function hasBothVersions(environment) {
       var envSel = '[data-environment="' + cssEscape(environment) + '"]';
-      var hasStable = $templates.find(envSel + '.stable').length > 0;
+      var hasStable = $templates.find(envSel + '.current').length > 0;
       var hasLts = $templates.find(envSel + '.lts').length > 0;
       return hasStable && hasLts;
     }
