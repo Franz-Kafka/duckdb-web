@@ -63,7 +63,7 @@ artifacts:
           sha256: "TODO"
 
   java:
-    filename: "duckdb_jdbc-1.4.4.0.jar"
+    filename: "duckdb_jdbc-1.5.0.0.jar"
     hashes:
       sha256: "TODO"
 
