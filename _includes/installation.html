@@ -294,7 +294,7 @@ pip install duckdb=={{ site.lts_duckdb_version }}
 
 </div>
 
-<!--
+{%- if site.current_duckdb_r_version == nil -%}
 <div class="current"
     data-environment="r"
     data-docs="{% link docs/stable/clients/r.md %}">
@@ -316,7 +316,7 @@ install.packages("duckdb", repos="https://p3m.dev/cran/__linux__/manylinux_2_28/
 {%- endhighlight -%}
 </div>
 </div>
--->
+{%- endif -%}
 
 <div class="lts"
     data-environment="r"
@@ -341,13 +341,14 @@ install.packages("duckdb", version="{{ site.lts_duckdb_r_version }}", repos="htt
 </div>
 
 
-<div class="lts"
+{%- if site.current_duckdb_java_version == nil -%}
+<div class="current"
     data-environment="java"
     data-docs="{% link docs/stable/clients/java.md %}">
 
 <h4>Direct Download (JAR)</h4>
 <a href="https://repo1.maven.org/maven2/org/duckdb/duckdb_jdbc/{{ site.current_duckdb_java_version }}/duckdb_jdbc-{{ site.current_duckdb_java_version }}.jar" class="download-btn" download="duckdb_jdbc-{{ site.current_duckdb_java_version }}.jar" download rel="noopener noreferrer">duckdb_jdbc-{{ site.current_duckdb_java_version }}.jar</a>
-{%- include checksum_inline.html environment="java" version="lts" -%}
+{%- include checksum_inline.html environment="java" version="current" -%}
 
 <h4>Maven</h4>
 
@@ -370,8 +371,42 @@ implementation("org.duckdb:duckdb_jdbc:{{ site.current_duckdb_java_version }}")
 </div>
 
 </div>
+{%- endif -%}
+
 
 <div class="lts"
+    data-environment="java"
+    data-docs="{% link docs/stable/clients/java.md %}">
+
+<h4>Direct Download (JAR)</h4>
+<a href="https://repo1.maven.org/maven2/org/duckdb/duckdb_jdbc/{{ site.lts_duckdb_java_version }}/duckdb_jdbc-{{ site.lts_duckdb_java_version }}.jar" class="download-btn" download="duckdb_jdbc-{{ site.lts_duckdb_java_version }}.jar" download rel="noopener noreferrer">duckdb_jdbc-{{ site.lts_duckdb_java_version }}.jar</a>
+{%- include checksum_inline.html environment="java" version="lts" -%}
+
+<h4>Maven</h4>
+
+{%- highlight xml -%}
+<dependency>
+    <groupId>org.duckdb</groupId>
+    <artifactId>duckdb_jdbc</artifactId>
+    <version>{{ site.lts_duckdb_java_version }}</version>
+</dependency>
+{%- endhighlight -%}
+
+<h4>Gradle</h4>
+
+{%- highlight groovy -%}
+implementation("org.duckdb:duckdb_jdbc:{{ site.lts_duckdb_java_version }}")
+{%- endhighlight -%}
+
+<div class="note">
+    Note that DuckDB on Windows requires the <a href="https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170">Microsoft Visual C++ Redistributable</a>.
+</div>
+
+</div>
+
+
+{%- if site.lts_duckdb_node_neo_version == nil -%}
+<div class="current"
     data-environment="nodejs"
     data-docs="{% link docs/stable/clients/node_neo/overview.md %}">
 
@@ -380,8 +415,20 @@ npm install @duckdb/node-api
 {%- endhighlight -%}
     
 </div>
+{%- endif -%}
 
-<!--
+
+<div class="lts"
+    data-environment="nodejs"
+    data-docs="{% link docs/stable/clients/node_neo/overview.md %}">
+
+{%- highlight bash -%}
+npm install @duckdb/node-api@{{ site.lts_duckdb_node_neo_version }}
+{%- endhighlight -%}
+    
+</div>
+
+{%- if site.current_duckdb_rust_version == nil -%}
 <div class="current"
     data-environment="rust"
     data-docs="{% link docs/stable/clients/rust.md %}">
@@ -391,7 +438,7 @@ cargo add duckdb --features bundled
 {%- endhighlight -%}
     
 </div>
--->
+{%- endif -%}
 
 <div class="lts"
     data-environment="rust"
@@ -403,7 +450,7 @@ cargo add duckdb@{{ site.lts_duckdb_rust_version }} --features bundled
 
 </div>
 
-<!--
+{%- if site.current_duckdb_go_version == nil -%}
 <div class="current"
     data-environment="go"
     data-docs="{% link docs/stable/clients/go.md %}">
@@ -413,7 +460,7 @@ go get github.com/duckdb/duckdb-go/v2
 {%- endhighlight -%}
 
 </div>
--->
+{%- endif -%}
 
 <div class="current"
     data-environment="go"
@@ -514,7 +561,7 @@ go get github.com/duckdb/duckdb-go/v2@{{ site.lts_duckdb_go_tag }}
 
 </div>
 
-<!--
+{%- if site.current_duckdb_odbc_version == nil -%}
 <div class="current"
     data-platform="linux"
     data-environment="odbc"
@@ -552,8 +599,7 @@ go get github.com/duckdb/duckdb-go/v2@{{ site.lts_duckdb_go_tag }}
 {%- include checksum_inline.html environment="odbc" platform="windows" architecture="arm64" version="current" -%}
 
 </div>
-
--->
+{%- endif -%}
 
 <div class="lts"
     data-platform="linux"

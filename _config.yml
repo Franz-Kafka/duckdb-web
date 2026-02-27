@@ -46,7 +46,7 @@ lts_duckdb_go_version: "1.4.4"
 lts_duckdb_go_tag: "v2.5.5"
 lts_duckdb_r_version: "1.4.4"
 lts_duckdb_rust_version: "1.4.4"
-lts_duckdb_node_neo_version: "1.4.4"
+lts_duckdb_node_neo_version: "1.4.4-r.1"
 livereload: true
 highlighter: rouge
 incremental: false
