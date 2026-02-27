@@ -18,9 +18,14 @@
     var $rgPlat = $container.find('.selection-options[data-role="platform"]');
     var $rgEnv = $container.find('.selection-options[data-role="environment"]');
 
+    var $versionSwitch = $inst.find('.version-switch');
+    var $versionBtns = $versionSwitch.find('.version-switch-option');
+    var $versionSlider = $versionSwitch.find('.version-switch-slider');
+
     var state = {
       platform: null,
-      environment: null
+      environment: null,
+      version: 'stable'
     };
 
     function detectPlatform() {
@@ -48,6 +53,8 @@
         var params = new URLSearchParams(window.location.search);
         state.platform = sanitizeParam(params.get('platform'));
         state.environment = sanitizeParam(params.get('environment'));
+        var v = sanitizeParam(params.get('version'));
+        if (v === 'lts' || v === 'stable') state.version = v;
       } catch (e) {}
     }
 
@@ -56,6 +63,7 @@
         var params = new URLSearchParams(window.location.search);
         setOrDelete(params, 'platform', state.platform);
         setOrDelete(params, 'environment', state.environment);
+        setOrDelete(params, 'version', state.version === 'lts' ? 'lts' : null);
         var newQuery = params.toString();
         var newUrl = window.location.pathname + (newQuery ? '?' + newQuery : '') + window.location.hash;
         var prevQuery = window.location.search.replace(/^\?/, '');
@@ -170,26 +178,71 @@
       $live.text(liveText.join(', '));
     }
 
+    function getVersionForEnv(prefix) {
+      if (!$inst || !$inst.length) return '';
+      var env = state.environment || '';
+      var attr = function (name) {
+        return String($inst.attr(prefix + name) || '').trim();
+      };
+      var ver = attr('core-version');
+      if (env === 'java') ver = attr('java-version') || ver;
+      else if (env === 'odbc') ver = attr('odbc-version') || ver;
+      else if (env === 'go') ver = attr('go-version') || ver;
+      else if (env === 'r') ver = attr('r-version') || ver;
+      else if (env === 'rust') ver = attr('rust-version') || ver;
+      return ver;
+    }
+
     function updateVersionLabel() {
       if (!$inst || !$inst.length) return;
-      var core = String($inst.attr('data-core-version') || '').trim();
-      var jv = String($inst.attr('data-java-version') || '').trim();
-      var ov = String($inst.attr('data-odbc-version') || '').trim();
-      var gv = String($inst.attr('data-go-version') || '').trim();
-      var rv = String($inst.attr('data-r-version') || '').trim();
-      var rustv = String($inst.attr('data-rust-version') || '').trim();
-      var env = state.environment || '';
-      var ver = core;
-      if (env === 'java' && jv) ver = jv;
-      else if (env === 'odbc' && ov) ver = ov;
-      else if (env === 'go' && gv) ver = gv;
-      else if (env === 'r' && rv) ver = rv;
-      else if (env === 'rust' && rustv) ver = rustv;
       var $cv = $inst.find('.currentversion');
-      if ($cv.length) {
-        if (ver) $cv.text('v' + ver);
-        else $cv.text('');
+      if (!$cv.length) return;
+
+      // Hide version label when switch is visible (switch shows version instead)
+      if (hasBothVersions(state.environment)) {
+        $cv.text('');
+        return;
       }
+
+      var prefix = state.version === 'lts' ? 'data-lts-' : 'data-';
+      var ver = getVersionForEnv(prefix);
+      if (ver) $cv.text('v' + ver);
+      else $cv.text('');
+    }
+
+    function updateVersionToggle() {
+      var showToggle = hasBothVersions(state.environment);
+      if (showToggle) {
+        $versionSwitch.removeAttr('hidden');
+      } else {
+        $versionSwitch.attr('hidden', '');
+        // Auto-select whichever version is available
+        var envSel = '[data-environment="' + cssEscape(state.environment) + '"]';
+        var hasStable = $templates.find(envSel + '.stable').length > 0;
+        state.version = hasStable ? 'stable' : 'lts';
+      }
+
+      $versionBtns.each(function () {
+        var isActive = $(this).data('version') === state.version;
+        $(this).toggleClass('active', isActive)
+          .attr('aria-checked', String(isActive));
+      });
+
+      positionSlider();
+    }
+
+    function positionSlider() {
+      var $active = $versionBtns.filter('.active').first();
+      if (!$active.length || $versionSwitch.is('[hidden]')) return;
+
+      var toggleLeft = $versionSwitch.find('.version-switch-toggle').offset().left;
+      var btnLeft = $active.offset().left;
+      var padding = 4;
+
+      $versionSlider.css({
+        width: $active.outerWidth() + 'px',
+        transform: 'translateX(' + (btnLeft - toggleLeft - padding) + 'px)'
+      });
     }
 
     function updateFoldouts(animate) {
@@ -222,20 +275,37 @@
       setFoldoutOpen($foldPlat, !shouldClosePlat, !!animate);
     }
 
+    function findTemplate(environment, platform, versionClass) {
+      var envSel = '[data-environment="' + cssEscape(environment) + '"]';
+      var cls = '.' + versionClass;
+      var $candidates = $templates.find(envSel + cls);
+
+      if (platform) {
+        var $match = $candidates.filter('[data-platform="' + cssEscape(platform) + '"]').first();
+        if ($match.length) return $match;
+      }
+
+      // Fallback: environment-only (e.g., Python, Node.js)
+      var $envOnly = $candidates.filter(':not([data-platform])').first();
+      if ($envOnly.length) return $envOnly;
+
+      return $();
+    }
+
     function bestTemplate() {
       var p = state.platform;
       var e = state.environment;
+      var v = state.version || 'stable';
 
-      if (!p || !e) return $();
+      if (!e) return $();
 
-      // Try platform + environment match
-      var sel = '[data-platform="' + cssEscape(p) + '"][data-environment="' + cssEscape(e) + '"]';
-      var $match = $templates.find(sel).first();
+      // Try requested version first
+      var $match = findTemplate(e, p, v);
       if ($match.length) return $match;
 
-      // Fallback: environment-only (e.g., Python, Node.js)
-      var selEnvOnly = '[data-environment="' + cssEscape(e) + '"]:not([data-platform])';
-      return $templates.find(selEnvOnly).first();
+      // Fallback: try the other version (for clients with only one version)
+      var altV = v === 'stable' ? 'lts' : 'stable';
+      return findTemplate(e, p, altV);
     }
 
     function environmentRequiresPlatform(environment) {
@@ -244,6 +314,13 @@
       if ($templates.find(selEnvOnly).length) return false;
       var selWithPlatform = '[data-environment="' + cssEscape(environment) + '"][data-platform]';
       return $templates.find(selWithPlatform).length > 0;
+    }
+
+    function hasBothVersions(environment) {
+      var envSel = '[data-environment="' + cssEscape(environment) + '"]';
+      var hasStable = $templates.find(envSel + '.stable').length > 0;
+      var hasLts = $templates.find(envSel + '.lts').length > 0;
+      return hasStable && hasLts;
     }
 
     function render() {
@@ -330,6 +407,7 @@
       writeURL();
       render();
       updateHeadings();
+      updateVersionToggle();
       updateVersionLabel();
       updateFoldouts(true);
     }
@@ -391,6 +469,27 @@
         }
       });
 
+      // Version switch toggle
+      $versionSwitch.on('click', '.version-switch-option', function (e) {
+        e.preventDefault();
+        var newVersion = $(this).data('version');
+        if (newVersion === state.version) return;
+        state.version = newVersion;
+        writeURL();
+        render();
+        updateVersionToggle();
+        updateVersionLabel();
+      });
+
+      $versionSwitch.on('keydown', '.version-switch-option', function (e) {
+        var key = e.key || e.keyCode;
+        if (key === 'ArrowRight' || key === 'ArrowLeft' || key === 39 || key === 37) {
+          e.preventDefault();
+          var $other = $versionBtns.not(this).first();
+          $other.trigger('click').focus();
+        }
+      });
+
       $container.on('keydown', '.selection-options .option', function (e) {
         var key = e.key || e.keyCode;
 
@@ -431,6 +530,7 @@
     $('.installation-instructions').hide();
     render();
     updateHeadings();
+    updateVersionToggle();
     updateVersionLabel();
     updateFoldouts(false);
     wire();

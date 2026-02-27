@@ -15,7 +15,12 @@ Notes:
 {%- assign env = include.environment -%}
 {%- assign plat = include.platform -%}
 {%- assign arch = include.architecture -%}
-{%- assign root = site.data.checksums.artifacts -%}
+{%- if include.version == "lts" -%}
+  {%- assign checksums_data = site.data.checksums_lts -%}
+{%- else -%}
+  {%- assign checksums_data = site.data.checksums -%}
+{%- endif -%}
+{%- assign root = checksums_data.artifacts -%}
 
 {%- assign entry = nil -%}
 
@@ -52,7 +57,7 @@ Notes:
 {%- endif -%}
 
 {%- if entry and entry.hashes -%}
-  {%- assign preferred = site.data.checksums.preferred_algorithms -%}
+  {%- assign preferred = checksums_data.preferred_algorithms -%}
   {%- if preferred == nil -%}
     {%- assign preferred = "sha256" | split: "," -%}
   {%- endif -%}

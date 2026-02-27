@@ -37,6 +37,14 @@ current_duckdb_csharp_version: "1.4.4"
 current_duckdb_dart_version: "1.4.4"
 current_duckdb_java_version: "1.4.4.0"
 current_duckdb_java_short_version: "1.4.4"
+# LTS version numbers
+lts_duckdb_version: "1.4.4"
+lts_duckdb_java_version: "1.4.4.0"
+lts_duckdb_odbc_version: "1.4.4.0"
+lts_duckdb_go_version: "1.4.4"
+lts_duckdb_r_version: "1.4.4"
+lts_duckdb_rust_version: "1.4.4"
+lts_duckdb_node_neo_version: "1.4.4"
 livereload: true
 highlighter: rouge
 incremental: false
