@@ -193,39 +193,38 @@
       return ver;
     }
 
-    function updateVersionLabel() {
-      if (!$inst || !$inst.length) return;
-      var $cv = $inst.find('.currentversion');
-      if (!$cv.length) return;
-
-      // Hide version label when switch is visible (switch shows version instead)
-      if (hasBothVersions(state.environment)) {
-        $cv.text('');
-        return;
-      }
-
-      var prefix = state.version === 'lts' ? 'data-lts-' : 'data-';
-      var ver = getVersionForEnv(prefix);
-      if (ver) $cv.text('v' + ver);
-      else $cv.text('');
+    function updateVersionButtons() {
+      var currentVer = getVersionForEnv('data-');
+      var ltsVer = getVersionForEnv('data-lts-');
+      $versionBtns.each(function () {
+        var v = $(this).data('version');
+        if (v === 'current' && currentVer) {
+          $(this).text(currentVer + ' (current)');
+        } else if (v === 'lts' && ltsVer) {
+          $(this).text(ltsVer + ' (LTS)');
+        }
+      });
+      positionSlider();
     }
 
     function updateVersionToggle() {
-      var showToggle = hasBothVersions(state.environment);
-      if (showToggle) {
-        $versionSwitch.removeAttr('hidden');
-      } else {
-        $versionSwitch.attr('hidden', '');
-        // Auto-select whichever version is available
-        var envSel = '[data-environment="' + cssEscape(state.environment) + '"]';
-        var hasStable = $templates.find(envSel + '.current').length > 0;
-        state.version = hasStable ? 'current' : 'lts';
-      }
+      var envSel = '[data-environment="' + cssEscape(state.environment) + '"]';
+      var hasCurrent = $templates.find(envSel + '.current').length > 0;
+      var hasLts = $templates.find(envSel + '.lts').length > 0;
+
+      // Auto-select available version if current selection is unavailable
+      if (!hasCurrent && state.version === 'current') state.version = 'lts';
+      if (!hasLts && state.version === 'lts') state.version = 'current';
 
       $versionBtns.each(function () {
-        var isActive = $(this).data('version') === state.version;
+        var v = $(this).data('version');
+        var isActive = v === state.version;
+        var isAvailable = (v === 'current') ? hasCurrent : hasLts;
+
         $(this).toggleClass('active', isActive)
-          .attr('aria-checked', String(isActive));
+          .attr('aria-checked', String(isActive))
+          .prop('disabled', !isAvailable)
+          .attr('aria-disabled', String(!isAvailable));
       });
 
       positionSlider();
@@ -233,7 +232,7 @@
 
     function positionSlider() {
       var $active = $versionBtns.filter('.active').first();
-      if (!$active.length || $versionSwitch.is('[hidden]')) return;
+      if (!$active.length) return;
 
       var toggleLeft = $versionSwitch.find('.version-switch-toggle').offset().left;
       var btnLeft = $active.offset().left;
@@ -314,13 +313,6 @@
       if ($templates.find(selEnvOnly).length) return false;
       var selWithPlatform = '[data-environment="' + cssEscape(environment) + '"][data-platform]';
       return $templates.find(selWithPlatform).length > 0;
-    }
-
-    function hasBothVersions(environment) {
-      var envSel = '[data-environment="' + cssEscape(environment) + '"]';
-      var hasStable = $templates.find(envSel + '.current').length > 0;
-      var hasLts = $templates.find(envSel + '.lts').length > 0;
-      return hasStable && hasLts;
     }
 
     function render() {
@@ -408,7 +400,7 @@
       render();
       updateHeadings();
       updateVersionToggle();
-      updateVersionLabel();
+      updateVersionButtons();
       updateFoldouts(true);
     }
 
@@ -478,7 +470,7 @@
         writeURL();
         render();
         updateVersionToggle();
-        updateVersionLabel();
+        updateVersionButtons();
       });
 
       $versionSwitch.on('keydown', '.version-switch-option', function (e) {
@@ -531,7 +523,7 @@
     render();
     updateHeadings();
     updateVersionToggle();
-    updateVersionLabel();
+    updateVersionButtons();
     updateFoldouts(false);
     wire();
   });

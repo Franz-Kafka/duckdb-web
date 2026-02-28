@@ -184,14 +184,8 @@ body.installation{
 			display: flex;
 			align-items: center;
 			flex-wrap: wrap;
-			gap: 8px;
+			gap: 24px;
 
-			.currentversion{
-				color: var(--main-text-secondary-color, #666);
-				font-size: 14px;
-				margin-left: 10px;
-				font-weight: 400;
-			}
 		}
 
 		.version-switch{
@@ -230,11 +224,16 @@ body.installation{
 			@include label-1;
 			font-weight: 500;
 			color: var(--interactive-filter-unselected-text-color, #666);
-			transition: color 0.3s;
+			transition: color 0.3s, opacity 0.3s;
 			white-space: nowrap;
 
 			&.active{
 				color: var(--main-text-primary-color, #0D0D0D);
+			}
+
+			&:disabled{
+				opacity: 0.35;
+				cursor: not-allowed;
 			}
 
 			&:focus-visible{
